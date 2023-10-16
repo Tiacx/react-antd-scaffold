@@ -2,9 +2,9 @@ import * as Antd from "antd"
 import Model from "@/models/base/Model";
 import { Form } from "antd";
 import { AnyObject } from "antd/es/_util/type";
-import { removeUndefined } from "@/utils/functions";
+import { callDelay, removeUndefined } from "@/utils/functions";
 import { v4 as uuidv4 } from "uuid"
-import { FunctionComponent, HTMLAttributes, ReactElement, ReactNode, useMemo } from "react";
+import { FunctionComponent, ReactElement, ReactNode, useMemo } from "react";
 import ModelRules from "@/models/base/ModelRules";
 import DisplayOnly from "./DisplayOnly";
 
@@ -20,7 +20,7 @@ export interface ModelFormProps extends Antd.FormProps {
 export interface ModelFormAttribute extends Antd.FormItemProps {
   component?: AnyObject
   componentProps?: AnyObject
-  rowOptions?: HTMLAttributes<HTMLDivElement>
+  itemsSpaceProps?: Antd.SpaceProps
   displayOnly?: boolean
   displayValue?: string | ReactNode
   columns?: Array<ModelFormColumn>
@@ -72,7 +72,7 @@ export default function ModelForm(props: ModelFormProps) {
         const formItemProps = removeUndefined({...itemProps} as AnyObject);
         delete formItemProps.component;
         delete formItemProps.componentProps;
-        delete formItemProps.rowOptions;
+        delete formItemProps.itemsSpaceProps;
         delete formItemProps.columns;
         delete formItemProps.displayOnly;
         delete formItemProps.displayValue;
@@ -85,11 +85,11 @@ export default function ModelForm(props: ModelFormProps) {
       });
 
       if (elements.length > 1) { // 多個控件
-        const rowOptions = removeUndefined(attr.rowOptions || {});
+        const itemsSpaceProps = removeUndefined(attr.itemsSpaceProps || {});
         return (
-          <Antd.Space.Compact {...rowOptions} key={uuidv4()}>
+          <Antd.Space {...itemsSpaceProps} key={uuidv4()}>
             {elements}
-          </Antd.Space.Compact>
+          </Antd.Space>
         );
       } else {
         return elements;
@@ -122,7 +122,9 @@ export default function ModelForm(props: ModelFormProps) {
 
   // 綁定 Form
   formProps.form = form;
-  props.model?.bindForm(form);
+  callDelay(() => {
+    props.model?.bindForm(form);
+  }, 500);
 
   return (
     <Antd.Spin spinning={props.loading || false}>
