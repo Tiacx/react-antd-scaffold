@@ -1,23 +1,28 @@
-import { Button, FormInstance, Input, Table, TableProps } from "antd";
+import { Button, DatePicker, FormInstance, Input, Table, TableProps } from "antd";
 import { AnyObject } from "antd/es/_util/type";
 import { ColumnType, TablePaginationConfig } from "antd/es/table";
 import DataProviderInterface from "@/utils/api/DataProviderInterface";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ColumnFilterItem, FilterDropdownProps } from "antd/es/table/interface";
 import { dataGet } from "@/utils/functions";
+import dayjs from "dayjs";
+import { RangeValue } from 'rc-picker/lib/interface';
 
-interface GridViewColOptions {
+export interface GridViewColOptions {
   value: number | string
   label: string
 }
 
-type GridViewColType = ColumnType<AnyObject> & {
+export type GridViewColType = ColumnType<AnyObject> & {
   filter?: boolean
+  filterType?: 'input' | 'date'
   options?: Array<GridViewColOptions>
   noWrap?: boolean
   searchForm?: FormInstance
 };
+
 type GridViewCols = { [key: string]: string | GridViewColType };
+export type { GridViewCols };
 
 export interface GridViewProps<RecordType> extends TableProps<RecordType> {
   cols?: GridViewCols
@@ -28,7 +33,55 @@ export interface GridViewProps<RecordType> extends TableProps<RecordType> {
   refresh?: number
 }
 
-export type { GridViewCols };
+// 文件篩選
+const filterInputDropdown = (filterProps: FilterDropdownProps) => {
+  const onConfirm = () => {
+    filterProps.confirm();
+  };
+  const onReset = () => {
+    if (filterProps.clearFilters) {
+      filterProps.clearFilters();
+      filterProps.confirm();
+    } else {
+      filterProps.setSelectedKeys([]);
+      filterProps.close();
+    }
+  };
+  return (
+    <div className="w-50 p-2">
+      <Input
+        placeholder="請輸入關鍵字"
+        value={filterProps.selectedKeys[0]}
+        onChange={(e) => filterProps.setSelectedKeys(e.target.value ? [e.target.value] : [])}
+        onPressEnter={onConfirm}
+      />
+      <div className="mt-1 flex space-x-2">
+        <Button type="primary" className="text-xs w-1/2 h-7" onClick={onConfirm}>確認</Button>
+        <Button type="default" className="text-xs w-1/2 h-7" onClick={onReset}>重置</Button>
+      </div>
+    </div>
+  );
+};
+// 日期篩選
+const filterDateDropdown = (filterProps: FilterDropdownProps) => {
+  const onChange = (values: RangeValue<dayjs.Dayjs>) => {
+    if (values && values[0] && values[1]) {
+      filterProps.setSelectedKeys([
+        values[0].format('YYYY-MM-DD'),
+        values[1].format('YYYY-MM-DD')
+      ]);
+      filterProps.confirm();
+    } else if (filterProps.clearFilters) {
+      filterProps.clearFilters();
+      filterProps.confirm();
+    }
+  };
+  return (
+    <div className="w-50 p-2">
+      <DatePicker.RangePicker onChange={onChange} />
+    </div>
+  );
+};
 
 export const GridView = (props: GridViewProps<AnyObject>) => {
   const [loading, setLoading] = useState<boolean>(false);
@@ -61,36 +114,6 @@ export const GridView = (props: GridViewProps<AnyObject>) => {
       tableProps.rowKey = dataProvider.getKey();
     }
 
-    // 自定義篩選
-    const filterDropdown = (filterProps: FilterDropdownProps) => {
-      const onConfirm = () => {
-        filterProps.confirm();
-      };
-      const onReset = () => {
-        if (filterProps.clearFilters) {
-          filterProps.clearFilters();
-          filterProps.confirm();
-        } else {
-          filterProps.setSelectedKeys([]);
-          filterProps.close();
-        }
-      };
-      return (
-        <div style={{ width: '10.5rem', padding: '0.5rem' }}>
-          <Input
-            placeholder="請輸入關鍵字"
-            value={filterProps.selectedKeys[0]}
-            onChange={(e) => filterProps.setSelectedKeys(e.target.value ? [e.target.value] : [])}
-            onPressEnter={onConfirm}
-          />
-          <div className="mt-1 flex justify-between">
-            <Button type="primary" className="text-xs w-20 h-7" onClick={onConfirm}>確認</Button>
-            <Button type="default" className="text-xs w-20 h-7" onClick={onReset}>重置</Button>
-          </div>
-        </div>
-      );
-    };
-
     // 列字段
     if (props.columns == undefined && props.cols != undefined) {
       const columns: GridViewColType[] = [];
@@ -118,7 +141,7 @@ export const GridView = (props: GridViewProps<AnyObject>) => {
               return { text: item.label, value: item.value };
             });
           } else {
-            column.filterDropdown = filterDropdown;
+            column.filterDropdown = column.filterType == 'date' ? filterDateDropdown : filterInputDropdown;
           }
           // 默認單選
           if (column.filterMultiple == undefined) column.filterMultiple = false;
@@ -152,8 +175,14 @@ export const GridView = (props: GridViewProps<AnyObject>) => {
         const params: AnyObject = {};
         params.filters = {};
         for (const [k, v] of Object.entries(filters)) {
-          const filterMultiple = dataGet(props.cols || {}, `${k}.filterMultiple`, false);
-          if (v != null) params.filters[k] = filterMultiple === true ? v.join(',') : v[0];
+          if (v == null) continue;
+          const colProps = dataGet(props.cols || {}, k, {}) as AnyObject;
+          if (colProps.filterType == 'date') {
+            params.filters['start_' + k] = v[0];
+            params.filters['end_' + k] = v[1];
+          } else {
+            params.filters[k] = colProps.filterMultiple === true ? v.join(',') : v[0];
+          }
         }
         if (sorter.column != undefined) {
           params.sort = sorter.field;

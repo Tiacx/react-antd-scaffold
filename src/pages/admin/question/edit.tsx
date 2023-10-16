@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import DetailView, { DetailViewAttribute } from "@/components/form/DetailView";
 import EditQuestionForm from "@/models/question/EditQuestion";
 import { Button, Radio, RadioGroupProps, TreeSelect, TreeSelectProps } from "antd";
@@ -26,7 +26,7 @@ export default function EditQuestion(props: EditQuestionProps) {
   const [allDepartments, setAllDepartments] = useState<AnyObject[]>([]);
   const [allTags, setAllTags] = useState<AnyObject[]>([]);
 
-  const [attributes, onFinish, onCancel] = useMemo(()=>{
+  const attributes = useMemo(()=>{
     const attributes: Array<DetailViewAttribute> = [
       {
         label: 'ID',
@@ -55,6 +55,7 @@ export default function EditQuestion(props: EditQuestionProps) {
           treeCheckable: true,
           showCheckedStrategy: "SHOW_PARENT",
           allowClear: true,
+          treeNodeFilterProp: 'title',
         } as TreeSelectProps,
       },
       {
@@ -63,8 +64,10 @@ export default function EditQuestion(props: EditQuestionProps) {
         component: TreeSelect,
         componentProps: {
           treeData: allDepartments,
+          showSearch: true,
           showCheckedStrategy: "SHOW_PARENT",
           allowClear: true,
+          treeNodeFilterProp: 'title',
         } as TreeSelectProps,
       },
       {
@@ -90,6 +93,7 @@ export default function EditQuestion(props: EditQuestionProps) {
           treeCheckable: true,
           showCheckedStrategy: "SHOW_PARENT",
           allowClear: true,
+          treeNodeFilterProp: 'title',
         } as TreeSelectProps,
       },
       {
@@ -101,6 +105,7 @@ export default function EditQuestion(props: EditQuestionProps) {
           options: allTags,
           showSearch: true,
           allowClear: true,
+          optionFilterProp: 'label',
         } as Select2Props,
       },
       {
@@ -115,24 +120,25 @@ export default function EditQuestion(props: EditQuestionProps) {
         } as RadioGroupProps
       }
     ];
+    return attributes;
+  }, [allCategories, allDepartments, allTags]);
 
-    const onFinish = async (values: EditQuestionForm) => {
-      if (values.staff_scopes) {
-        values.staff_scopes = values.staff_scopes.map(item=>item.value);
-      }
-      values.departments = [values.departments as string];
-      const response = await questionService.update(values.id as string, values);
+  const onFinish = useCallback((values: EditQuestionForm) => {
+    if (values.staff_scopes) {
+      values.staff_scopes = values.staff_scopes.map(item=>item.value);
+    }
+    values.departments = [values.departments as string];
+    questionService.update(values.id as string, values).then((response) => {
       if (response.status == 1) {
         props.onFinish(response);
       }
-    };
+    });
+  }, [props]);
 
-    const onCancel = ()=>{
-      model.clearForm();
-      props.onCancel();
-    };
-    return [attributes, onFinish, onCancel];
-  }, [allCategories, allDepartments, allTags, props]);
+  const onReset = useCallback(() => {
+    model.clearForm();
+    props.onCancel();
+  }, [props]);
 
   useEffect(()=>{
     // 分类树
@@ -176,11 +182,12 @@ export default function EditQuestion(props: EditQuestionProps) {
       attributes={attributes}
       className="mt-7"
       onFinish={onFinish}
+      onReset={onReset}
       loading={loading}
       labelCol={{span: 4}}
       buttons={[
         <Button type="primary" htmlType="submit" key="1">保存</Button>,
-        <Button type="default" key="2" onClick={onCancel}>取消</Button>,
+        <Button type="default" htmlType="reset" key="2">取消</Button>,
       ]}
       buttonsWrapperProps={{
         className: 'text-right mt-10',

@@ -5,7 +5,7 @@ import { callDelay } from "@/utils/functions";
 import { AnyObject } from "antd/es/_util/type";
 import Api from "@/utils/api/Api";
 
-interface SelectPagination {
+export interface SelectPagination {
   pageKey?: string
   pageSizeKey?: string
 }

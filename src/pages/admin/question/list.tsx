@@ -1,19 +1,24 @@
-import { Breadcrumb, Button, Modal } from "antd"
+import { Breadcrumb, Button, Form, Modal, TreeSelect, TreeSelectProps } from "antd"
 import { GridViewCols, GridView } from "@/components/table/GridView";
 import ApiDataProvider from "@/utils/api/ApiDataProvider";
 import { AnyObject } from "antd/es/_util/type";
 import questionService from "@/services/Admin/QuestionService";
 import CollapseContent from "@/components/table/CollapseContent";
 import EditQuestion from "./edit";
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import QuestionStatus from "@/enums/QuestionStatus";
 import "@/assets/styles/table.css"
+import SearchForm from "@/components/form/SearchForm";
+import categoryService from "@/services/Admin/CategoryService";
 
 export default function QuestionList() {
+  const [form] = Form.useForm();
+  const [allCategories, setAllCategories] = useState<AnyObject[]>([]);
+  const [params, setParams] = useState<AnyObject>({with_answer: 1});
   const [showEditModal, setShowEditModal] = useState<boolean>(false);
   const [questionId, setQuestionId] = useState<string>('');
 
-  const [columns, dataProvider] = useMemo(()=>{
+  const columns = useMemo(()=>{
     const columns: GridViewCols = {
       qid: 'QID|sorter|filter',
       title: {
@@ -45,10 +50,14 @@ export default function QuestionList() {
       created_at: {
         title: '首次上傳時間',
         sorter: true,
+        filter: true,
+        filterType: 'date',
       },
       updated_at: {
         title: '最後修改時間',
         sorter: true,
+        filter: true,
+        filterType: 'date',
       },
       status: {
         title: '狀態',
@@ -64,17 +73,39 @@ export default function QuestionList() {
         }}>編輯</Button>
       },
     };
+    return columns;
+  }, []);
 
-    const dataProvider = new ApiDataProvider({
+  const dataProvider = useMemo(() => {
+    return new ApiDataProvider({
       service: questionService,
       method: 'getList',
-      params: {
-        'with_answer': 1,
-      }
+      params: params
     });
+  }, [params]);
 
-    return [columns, dataProvider];
+  useEffect(() => {
+    // 分类树
+    categoryService.all({return_tree: 1}).then((response)=>{
+      setAllCategories(response.data || []);
+    });
   }, []);
+
+  const onSelectCategory = useCallback((_value: string, node: AnyObject) => {
+    form.setFieldValue('categories', node.title);
+  }, [form]);
+
+  const onSearch = useCallback((values: AnyObject) => {
+    setParams({
+      with_answer: 1,
+      filters: values,
+    });
+  }, []);
+
+  const onReset = useCallback(() => {
+    form.resetFields();
+    setParams({with_answer: 1});
+  }, [form]);
 
   return (
     <>
@@ -82,13 +113,36 @@ export default function QuestionList() {
         {title: 'admin'},
         {title: 'question'}
       ]} />
-      <GridView
-        cols={columns}
-        dataProvider={dataProvider}
-        align="center"
-        rowSelection={{type: 'checkbox'}}
-        noWrap={true}
-      />
+      <div className="bg-white">
+        <SearchForm
+          className="p-2"
+          form={form}
+          items={{
+            'categories': {
+              label: '分類',
+              component: TreeSelect,
+              componentProps: {
+                treeData: allCategories,
+                showSearch: true,
+                allowClear: true,
+                treeNodeFilterProp: 'title',
+                onSelect: onSelectCategory,
+              } as TreeSelectProps,
+              wrapperCol: {className: 'w-60'}
+            },
+            'title': '標題',
+          }}
+          onFinish={onSearch}
+          onReset={onReset}
+        />
+        <GridView
+          cols={columns}
+          dataProvider={dataProvider}
+          align="center"
+          rowSelection={{type: 'checkbox'}}
+          noWrap={true}
+        />
+      </div>
       <Modal
         title="編輯問題"
         footer={false}

@@ -16,7 +16,7 @@ class Model
     return Object.getOwnPropertyDescriptor(this, prop)?.value ?? defaultValue;
   }
 
-  toObject(): object
+  toObject(): AnyObject
   {
     const properties: {[key: string]: unknown} = {};
     for (const key in this) {
@@ -48,7 +48,6 @@ class Model
   clearForm(): void
   {
     this.formInstance?.resetFields();
-    this.formInstance = undefined;
   }
 }
 

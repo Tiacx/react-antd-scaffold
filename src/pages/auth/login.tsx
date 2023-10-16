@@ -34,8 +34,7 @@ export default function Login() {
       if (response.status == 1) {
         api.setToken(response.data.token, response.data.expires_in);
         api.setStaff(response.data.staff);
-        api.autoRefreshToken(); // 設置自動刷新Token
-        navigate('/');
+        navigate('/admin/question');
       } else {
         message.error(response.message);
       }
