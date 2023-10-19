@@ -163,7 +163,7 @@ export default function EditQuestion(props: EditQuestionProps) {
     questionService.get(props.id).then((response)=>{
       if (response.data) {
         if (response.data.departments) {
-          response.data.departments = response.data.departments[0].id;
+          response.data.departments = response.data.departments[0]?.id;
         }
         if (response.data.staff_scopes) {
           response.data.staff_scopes = response.data.staff_scopes.map((item: AnyObject)=>{

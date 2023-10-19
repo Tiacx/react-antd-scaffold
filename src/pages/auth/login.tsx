@@ -44,7 +44,7 @@ export default function Login() {
 
   useEffect(()=>{
     if (api.checkIsLogin()) {
-      navigate('/');
+      navigate('/admin/question');
     }
   }, [navigate]);
 

@@ -43,21 +43,26 @@ export default function Select2(props: Select2Props) {
         };
       });
       setPage(_page);
-      setOptions(_page == 1 ? data : [...options, ...data]);
+      setOptions(data);
     });
-  }, [props, options]);
+  }, [props]);
 
   // 滾動加載更多
   const onPopupScroll = useCallback((e: React.UIEvent<HTMLDivElement, UIEvent>) => {
-    const clientHeight = e.currentTarget.clientHeight;
-    const scrollTop = e.currentTarget.scrollTop;
-    const scrollHeight = e.currentTarget.scrollHeight;
+    const target = e.currentTarget;
+    const clientHeight = target.clientHeight;
+    const scrollTop = target.scrollTop;
+    const scrollHeight = target.scrollHeight;
     if (clientHeight + scrollTop > scrollHeight - 20) {
       callDelay(() => {
         fetchData(keyword, page + 1);
       }, props.delay || 500);
+    } else if (scrollTop == 0) {
+      callDelay(() => {
+        fetchData(keyword, Math.max(1, page - 1));
+      }, props.delay || 500);
     }
-  }, [fetchData, props.delay, keyword, page]);
+  }, [props.delay, fetchData, keyword, page]);
 
   const select2Props = useMemo(()=>{
     const select2Props = Object.assign({}, props);
@@ -86,7 +91,7 @@ export default function Select2(props: Select2Props) {
 
   select2Props.options = options;
 
-  if (props.url != undefined && props.onPopupScroll == undefined) {
+  if (props.url != undefined && props.pagination !== false && props.onPopupScroll == undefined) {
     select2Props.onPopupScroll = onPopupScroll;
   }
 
