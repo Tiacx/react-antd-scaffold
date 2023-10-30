@@ -8,6 +8,7 @@ import Api from "@/utils/api/Api";
 export interface SelectPagination {
   pageKey?: string
   pageSizeKey?: string
+  pageSize?: number
 }
 
 export interface Select2Props extends SelectProps {
@@ -15,7 +16,7 @@ export interface Select2Props extends SelectProps {
   delay?: number
   searchKey?: string
   labelKey?: string | CallableFunction
-  valueKey?: string |CallableFunction
+  valueKey?: string | CallableFunction
   pagination?: true | false | SelectPagination
 }
 
@@ -25,7 +26,7 @@ export default function Select2(props: Select2Props) {
   const [options, setOptions] = useState<DefaultOptionType[]>(props.options || []);
 
   // 獲取數據
-  const fetchData = useCallback((_keyword: string, _page: number = 1, _pageSize: number = 10) => {
+  const fetchData = useCallback((_keyword: string, _page: number = 1) => {
     if (!props.url) return;
     setOptions([]);
     const params: AnyObject = {};
@@ -33,10 +34,10 @@ export default function Select2(props: Select2Props) {
     if (props.pagination !== false) {
       const pagination = ((props.pagination === true) ? {} : props.pagination || {}) as SelectPagination;
       params[pagination.pageKey || 'page'] = _page;
-      params[pagination.pageSizeKey || 'pageSize'] = _pageSize;
+      params[pagination.pageSizeKey || 'pageSize'] = pagination.pageSize || 10;
     }
     Api.get(props.url, {params: params}).then((response: AnyObject)=>{
-      const data = response.data.data?.map((item: DefaultOptionType)=>{
+      const data: DefaultOptionType[] = response.data.data?.map((item: DefaultOptionType)=>{
         return {
           label: typeof(props.labelKey) == 'string' ? item[props.labelKey] : (props.labelKey as CallableFunction)(item),
           value: typeof(props.valueKey) == 'string' ? item[props.valueKey] : (props.valueKey as CallableFunction)(item),
@@ -96,6 +97,6 @@ export default function Select2(props: Select2Props) {
   }
 
   return (
-    <Select {...select2Props}/>
+    <Select {...select2Props} />
   );
 }

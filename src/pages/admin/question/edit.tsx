@@ -7,7 +7,7 @@ import TextArea from "antd/es/input/TextArea";
 import categoryService from "@/services/Admin/CategoryService";
 import { AnyObject } from "antd/es/_util/type";
 import unitService from "@/services/Admin/UnitService";
-import Select2, { Select2Props } from "@/components/form/Select2";
+import Select2, { Select2Props } from "@/components/select/Select2";
 import tagService from "@/services/Admin/TagService";
 import ReactQuill from "react-quill";
 import 'react-quill/dist/quill.snow.css';

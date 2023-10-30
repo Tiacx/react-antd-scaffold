@@ -6,7 +6,7 @@ import { callDelay, removeUndefined } from "@/utils/functions";
 import { v4 as uuidv4 } from "uuid"
 import { FunctionComponent, ReactElement, ReactNode, useMemo } from "react";
 import ModelRules from "@/models/base/ModelRules";
-import DisplayOnly from "./DisplayOnly";
+import DisplayOnly from "../content/DisplayOnly";
 
 export interface ModelFormProps extends Antd.FormProps {
   model?: Model & ModelRules

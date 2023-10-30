@@ -3,7 +3,7 @@ import { GridViewCols, GridView } from "@/components/table/GridView";
 import ApiDataProvider from "@/utils/api/ApiDataProvider";
 import { AnyObject } from "antd/es/_util/type";
 import questionService from "@/services/Admin/QuestionService";
-import CollapseContent from "@/components/table/CollapseContent";
+import CollapseContent from "@/components/content/CollapseContent";
 import EditQuestion from "./edit";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import QuestionStatus from "@/enums/QuestionStatus";

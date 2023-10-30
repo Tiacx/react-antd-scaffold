@@ -2,13 +2,13 @@ import { recursiveMap } from "@/utils/functions";
 import { AnyObject } from "antd/es/_util/type";
 import { ReactNode, useMemo } from "react";
 
-export interface SpanProps {
+export interface DisplayOnlyProps {
   value?: string
   children?: ReactNode
   componentProps?: AnyObject
 }
 
-export default function DisplayOnly(props: SpanProps) {
+export default function DisplayOnly(props: DisplayOnlyProps) {
   const content = useMemo(() => {
     let content;
     if (typeof(props.value) == 'string') {
