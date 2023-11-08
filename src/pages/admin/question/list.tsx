@@ -127,6 +127,7 @@ export default function QuestionList() {
                 allowClear: true,
                 treeNodeFilterProp: 'title',
                 onSelect: onSelectCategory,
+                fieldNames: {value: 'key'},
               } as TreeSelectProps,
               wrapperCol: {className: 'w-60'}
             },

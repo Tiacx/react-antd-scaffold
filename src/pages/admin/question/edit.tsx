@@ -56,6 +56,7 @@ export default function EditQuestion(props: EditQuestionProps) {
           showCheckedStrategy: "SHOW_PARENT",
           allowClear: true,
           treeNodeFilterProp: 'title',
+          fieldNames: {value: 'key'},
         } as TreeSelectProps,
       },
       {
@@ -68,6 +69,7 @@ export default function EditQuestion(props: EditQuestionProps) {
           showCheckedStrategy: "SHOW_PARENT",
           allowClear: true,
           treeNodeFilterProp: 'title',
+          fieldNames: {value: 'key'},
         } as TreeSelectProps,
       },
       {
@@ -94,6 +96,7 @@ export default function EditQuestion(props: EditQuestionProps) {
           showCheckedStrategy: "SHOW_PARENT",
           allowClear: true,
           treeNodeFilterProp: 'title',
+          fieldNames: {value: 'key'},
         } as TreeSelectProps,
       },
       {
