@@ -3,7 +3,7 @@ import { Dropdown, Layout, MenuProps, Space } from 'antd'
 import { DownOutlined } from '@ant-design/icons'
 import * as api from "@/utils/api/Api"
 import authService from "@/services/Auth/AuthService"
-import { Outlet, useNavigate } from "react-router-dom"
+import { Link, Outlet, useNavigate } from "react-router-dom"
 
 const {Header, Content} = Layout;
 
@@ -26,10 +26,7 @@ export default function MainLayout() {
   const items: MenuProps['items'] = [
     {
       key: 'backend',
-      label: '後臺管理',
-      onClick: () => {
-        navigate('/admin/question');
-      }
+      label: <Link to='/admin/question'>後臺管理</Link>,
     },
     {
       key: 'logout',

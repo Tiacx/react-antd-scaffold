@@ -4,7 +4,7 @@ import { DownOutlined } from '@ant-design/icons'
 import * as api from "@/utils/api/Api"
 import authService from "@/services/Auth/AuthService"
 import Sider from "antd/es/layout/Sider"
-import { Outlet, useNavigate } from "react-router-dom"
+import { Link, Outlet, useNavigate } from "react-router-dom"
 
 const {Header, Content} = Layout;
 
@@ -27,10 +27,7 @@ export default function MainLayout() {
   const items: MenuProps['items'] = [
     {
       key: 'frontend',
-      label: '前臺管理',
-      onClick: () => {
-        navigate('/');
-      }
+      label: <Link to='/'>前臺管理</Link>,
     },
     {
       key: 'logout',
@@ -71,7 +68,6 @@ export default function MainLayout() {
             defaultOpenKeys={['content']}
             style={{ height: '100%', borderRight: 0 }}
             theme="dark"
-            onClick={(event) => navigate(event.key)}
             items={[
               {
                 key: 'content',
@@ -79,21 +75,21 @@ export default function MainLayout() {
                 children: [
                   {
                     key: '/admin/question',
-                    label: '問題管理',
+                    label: <Link to='/admin/question'>問題管理</Link>,
                   },
                   {
                     key: '/admin/category',
-                    label: '分類管理',
+                    label: <Link to='/admin/category'>分類管理</Link>,
                   },
                   {
                     key: '/admin/tag',
-                    label: '標籤管理',
+                    label: <Link to='/admin/tag'>標籤管理</Link>,
                   }
                 ],
               },
               {
                 key: '/admin/role',
-                label: '角色管理',
+                label: <Link to='/admin/role'>角色管理</Link>,
               }
             ]}
           />
